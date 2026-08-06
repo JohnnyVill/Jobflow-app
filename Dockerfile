@@ -4,9 +4,10 @@ COPY --from=ghcr.io/astral-sh/uv:0.12.2 /uv /uvx /bin/
 
 WORKDIR /app
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
+#Stop python from writing .pyc files and buffer outputs
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+    
 COPY pyproject.toml uv.lock ./
 
 RUN uv sync \

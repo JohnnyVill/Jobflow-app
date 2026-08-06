@@ -8,7 +8,7 @@ app = FastAPI(
 
 @app.get("/")
 def root() -> dict[str, str]:
-    return {"message": "Jobflow API is running"}
+    return {"message": "Jobflow API is running, Image update"}
 
 
 @app.get("/health")

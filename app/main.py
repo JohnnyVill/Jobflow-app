@@ -1,12 +1,19 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from enum import StrEnum
+
+class ApplicationStatus(StrEnum):
+    APPLIED = "applied"
+    REJECTED = "rejected"
+    INTERVIEW = "interview"
+    OFFER = "offer"
 
 #how incoming json request body should be interpreted
 class JobApplication(BaseModel):
     id: int 
     company: str 
     position: str 
-    status: str 
+    status: ApplicationStatus
 
 class ApplicationStorage:   
     applications: list[JobApplication] = []
@@ -30,6 +37,7 @@ def create_application(application: JobApplication):
                 status_code=409,
                 detail="Application ID already"
             )
+    
     ApplicationStorage.applications.append(application)
     return application
 

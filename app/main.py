@@ -52,4 +52,13 @@ def get_application(application_id: int):
             return application
     
     raise HTTPException(status_code=404, detail="Application not found")
+
+@app.delete("/applications/{application_id}")
+def delete_application(application_id: int):
+    applicationStorage = ApplicationStorage.applications
+    for index in  range(len(applicationStorage)):
+        if application_id == applicationStorage[index].id:
+            del applicationStorage[index]
+            return {"message": "Item deleted"}
+    raise HTTPException(status_code=404, detail="Application not found")
    

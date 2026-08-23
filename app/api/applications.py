@@ -1,8 +1,12 @@
 from fastapi import APIRouter, HTTPException
+
 from app.models.application import JobApplication
 from app.services.application_service import (
-    get_application, get_applications,
-    create_application, delete_application)
+    create_application,
+    delete_application,
+    get_application,
+    get_applications,
+)
 
 applications_router = APIRouter(
     prefix="/applications",
@@ -25,7 +29,7 @@ def make_application(application : JobApplication):
     success = create_application(application)
     if success:
         return success
-    raise HTTPException(status_code=400, detail="Bad Request")
+    raise HTTPException(status_code=409, detail="Duplicate Request")
 
 @applications_router.delete("/{application_id}")
 def delete(application_id: int):

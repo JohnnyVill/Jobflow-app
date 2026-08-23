@@ -1,6 +1,6 @@
 # Jobflow
 
-A backend API for tracking job applications and related workflows.
+an AI-powered career operating system that helps job seekers manage applications, tailor resumes, generate cover letters, prepare for interviews, and automate repetitive parts of the job search.
 
 ## Requirements
 
@@ -13,3 +13,4 @@ A backend API for tracking job applications and related workflows.
 ```bash
 uv sync
 uv run fastapi dev app/main.py
+```

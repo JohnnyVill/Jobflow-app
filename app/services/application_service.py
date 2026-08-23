@@ -1,7 +1,10 @@
+from typing import ClassVar
+
 from app.models.application import JobApplication
 
+
 class ApplicationStorage:   
-    applications: list[JobApplication] = []
+    applications: ClassVar[list[JobApplication]] = []
 
 
 def create_application(application: JobApplication):

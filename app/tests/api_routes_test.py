@@ -131,3 +131,20 @@ def test_get_missing_application():
     response = client.get("/applications/999")
 
     assert response.status_code == 404
+
+def delete_nonexisting_application():
+    response = client.delete("/applications/999")
+    assert response.status_code == 404
+
+def test_invalid_application():
+    response = client.post(
+        "/applications",
+        json={
+            "id":1,
+            "company":"good vibes",
+            "position":"vibe cordinator",
+            "status":"lost"
+        }
+    )
+
+    assert response.status_code ==  422

@@ -132,7 +132,7 @@ def test_get_missing_application():
 
     assert response.status_code == 404
 
-def delete_nonexisting_application():
+def test_delete_nonexisting_application():
     response = client.delete("/applications/999")
     assert response.status_code == 404
 

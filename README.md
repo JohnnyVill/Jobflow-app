@@ -24,7 +24,7 @@ provides a REST API for managing job applications using in-memory storage.
 - FastAPI
 - Pydantic
 - Pytest
-- HTTPX
+- HTTPX2
 - uv
 - Docker
 

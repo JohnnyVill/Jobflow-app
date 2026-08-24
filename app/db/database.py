@@ -1,6 +1,7 @@
 import asyncio
+import os
 
-from sqlalchemy import text, String
+from sqlalchemy import text, String, select
 from sqlalchemy.ext.asyncio import (
     create_async_engine, 
     async_sessionmaker
@@ -8,8 +9,9 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.exc import OperationalError 
 
-DATABASE_URL = "postgresql+asyncpg://postgres:postgres@db:5432/jobflow"
+DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_async_engine(DATABASE_URL)
+
 
 #Test engine connection
 async def test_connection():
@@ -21,7 +23,6 @@ async def test_connection():
     except OperationalError as e:
         print(f"Connection Failed: {e}")
 
-asyncio.run(test_connection())
 
 #Session object maker
 async_session_local = async_sessionmaker(
@@ -30,6 +31,7 @@ async_session_local = async_sessionmaker(
     autoflush=False,
     autocommit=False
 )
+
 
 #Table creation layout
 class Base(DeclarativeBase):
@@ -41,7 +43,27 @@ class Test(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(30))
 
-    def __repr__(self) -> str:
-        return f"Test(id={self.id!r},name={self.name!r})"
+async def create_tables():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    print("Table created")
 
-print(Base.metadata.tables)
+
+#verify if sessions are made
+async def test_session():
+    async with async_session_local() as session:
+        async with session.begin():
+            first_test = Test(name = "Test 1")
+            session.add(first_test)
+
+        result = await session.execute(select(Test))
+        test_result = result.scalars().all()
+        for t in test_result:
+            print(t.name)
+
+
+async def main():
+    await test_connection()
+    await create_tables()
+    await test_session()
+asyncio.run(main())

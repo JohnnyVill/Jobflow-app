@@ -68,4 +68,6 @@ async def test_session():
 async def main():
     # await create_tables()
     await test_session()
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())

@@ -38,7 +38,7 @@ async_session_local = async_sessionmaker(
 class Base(DeclarativeBase):
     pass
 
-class Applications(Base):
+class Application(Base):
     __tablename__ = "application"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -56,10 +56,10 @@ class Applications(Base):
 async def test_session():
     async with async_session_local() as session:
         async with session.begin():
-            first_test = Applications(company = "Google", position = "Software Engineer", status = ApplicationStatus.OFFER)
+            first_test = Application(company = "Google", position = "Software Engineer", status = ApplicationStatus.OFFER)
             session.add(first_test)
 
-        result = await session.execute(select(Applications))
+        result = await session.execute(select(Application))
         test_result = result.scalars().all()
         for t in test_result:
             print(t.company, t.position, t.status)

@@ -10,6 +10,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
 
   db:
     image: postgres:17

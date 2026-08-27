@@ -14,17 +14,6 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_async_engine(DATABASE_URL)
 
 
-#Test engine connection
-# async def test_connection():
-#     try:
-#         async with engine.connect() as connection:
-#             result = await connection.execute(text("SElECT 1"))
-#             print(result.scalar())
-#         print("Connection Successfull")
-#     except OperationalError as e:
-#         print(f"Connection Failed: {e}")
-
-
 #Session object maker
 async_session_local = async_sessionmaker(
     bind=engine,
@@ -45,29 +34,3 @@ class Application(Base):
     company: Mapped[str] = mapped_column(String(255), nullable=False)
     position: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[ApplicationStatus] = mapped_column(Enum(ApplicationStatus), nullable=False)
-
-async def create_tables():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    print("Table created")
-
-
-#verify if sessions are made
-# async def test_session():
-#     async with async_session_local() as session:
-#         async with session.begin():
-#             first_test = Application(company = "Google", position = "Software Engineer", status = ApplicationStatus.OFFER)
-#             session.add(first_test)
-
-#         result = await session.execute(select(Application))
-#         test_result = result.scalars().all()
-#         for t in test_result:
-#             print(t.company, t.position, t.status)
-
-
-async def main():
-    await create_tables()
-    # await test_session()
-
-if __name__ == "__main__":
-    asyncio.run(main())

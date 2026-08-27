@@ -1,53 +1,40 @@
 from typing import ClassVar
-from collections.abc import AsyncGenerator
 
 from fastapi import FastAPI, Depends
 
-
 from app.models.application import JobApplication
+from app.db.database import Application
 
-from app.db.database import async_session_local, Application
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class ApplicationStorage:   
-    applications: ClassVar[list[JobApplication]] = []
-
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async with async_session_local() as session:
-        yield session
-
-async def create_application(application: JobApplication, db: AsyncSession = Depends(get_db)):
+async def create_application(application: JobApplication, db: AsyncSession):
     #check if application already exist
-    applicant_id = application.id 
     async with db.begin():
         new_application = Application(
             company=application.company,
             position=application.position,
             status=application.status
         )
-        await db.refresh(new_application)
+        db.add(new_application)
         print(f"Inserted User ID: {new_application.id}, {new_application.company}")
+        return new_application
 
 
-async def get_applications(db: AsyncSession = Depends(get_db)):
+async def get_applications(db: AsyncSession):
     applications = await db.execute(select(Application))
     return applications.scalars().all()
 
     
-
-
-async def get_application(application_id: int, db: AsyncSession = Depends(get_db)):
+async def get_application(application_id: int, db: AsyncSession):
     statement = select(Application).where(Application.id == application_id)
-    application = await db.scalars(statement)
-    return application.all()
+    application = await db.execute(statement)
+    return application.scalar_one_or_none()
 
 
-def delete_application(application_id: int):
-    application_storage = ApplicationStorage.applications
-    for index in  range(len(application_storage)):
-        if application_id == application_storage[index].id:
-            del application_storage[index]
-            return True
+async def delete_application(application_id: int, db: AsyncSession):
+    statement = delete(Application).where(Application.id == application_id)
+    await db.execute(statement)
     return False
+    

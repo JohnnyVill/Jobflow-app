@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.application import JobApplication
 from app.services.application_service import (
@@ -8,32 +10,43 @@ from app.services.application_service import (
     get_applications,
 )
 
+from app.db.database import get_db
+
 applications_router = APIRouter(
     prefix="/applications",
     tags = ["applications"]
 )
 
+
+
+
 @applications_router.get("")
-def get_all_applications():
-    return get_applications()
+async def get_all_applications(db: AsyncSession = Depends(get_db)):
+   applications = await get_applications(db)
+   return applications
+
 
 @applications_router.get("/{application_id}")
-def get_app(application_id : int):
-    application = get_application(application_id)
+async def get_app(application_id : int, db: AsyncSession = Depends(get_db)):
+    application = await get_application(application_id, db)
+
     if application:
         return application
     raise HTTPException(status_code=404, detail="Application not found")
 
+
 @applications_router.post("")
-def make_application(application : JobApplication):
-    success = create_application(application)
+async def make_application(application : JobApplication, db: AsyncSession = Depends(get_db)):
+    success = await create_application(application, db)
+
     if success:
         return success
     raise HTTPException(status_code=409, detail="Duplicate Request")
 
+
 @applications_router.delete("/{application_id}")
-def delete(application_id: int):
-    success = delete_application(application_id)
+async def delete(application_id: int, db: AsyncSession = Depends(get_db)):
+    success = await delete_application(application_id, db)
     if success:
         return {"message": "Item deleted"}
     raise HTTPException(status_code=404, detail="Application not found")

@@ -10,6 +10,9 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.exc import OperationalError
 from app.models.application import ApplicationStatus
 
+from collections.abc import AsyncGenerator
+from sqlalchemy.ext.asyncio import AsyncSession
+
 DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_async_engine(DATABASE_URL)
 
@@ -22,6 +25,9 @@ async_session_local = async_sessionmaker(
     autocommit=False
 )
 
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with async_session_local() as session:
+        yield session
 
 #Table creation layout
 class Base(DeclarativeBase):

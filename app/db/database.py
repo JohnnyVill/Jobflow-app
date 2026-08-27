@@ -46,28 +46,28 @@ class Application(Base):
     position: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[ApplicationStatus] = mapped_column(Enum(ApplicationStatus), nullable=False)
 
-# async def create_tables():
-#     async with engine.begin() as conn:
-#         await conn.run_sync(Base.metadata.create_all)
-#     print("Table created")
+async def create_tables():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    print("Table created")
 
 
 #verify if sessions are made
-async def test_session():
-    async with async_session_local() as session:
-        async with session.begin():
-            first_test = Application(company = "Google", position = "Software Engineer", status = ApplicationStatus.OFFER)
-            session.add(first_test)
+# async def test_session():
+#     async with async_session_local() as session:
+#         async with session.begin():
+#             first_test = Application(company = "Google", position = "Software Engineer", status = ApplicationStatus.OFFER)
+#             session.add(first_test)
 
-        result = await session.execute(select(Application))
-        test_result = result.scalars().all()
-        for t in test_result:
-            print(t.company, t.position, t.status)
+#         result = await session.execute(select(Application))
+#         test_result = result.scalars().all()
+#         for t in test_result:
+#             print(t.company, t.position, t.status)
 
 
 async def main():
-    # await create_tables()
-    await test_session()
+    await create_tables()
+    # await test_session()
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -11,7 +11,6 @@ class ApplicationStatus(StrEnum):
 
 #how incoming json request body should be interpreted
 class JobApplication(BaseModel):
-    id: int 
     company: str 
     position: str 
     status: ApplicationStatus

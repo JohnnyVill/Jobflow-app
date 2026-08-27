@@ -1,17 +1,11 @@
-import asyncio
 import os
-
-from sqlalchemy import String, select, Enum
-from sqlalchemy.ext.asyncio import (
-    create_async_engine, 
-    async_sessionmaker
-    )
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy.exc import OperationalError
-from app.models.application import ApplicationStatus
-
 from collections.abc import AsyncGenerator
-from sqlalchemy.ext.asyncio import AsyncSession
+
+from sqlalchemy import Enum, String
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+from app.models.application import ApplicationStatus
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_async_engine(DATABASE_URL)
@@ -25,7 +19,7 @@ async_session_local = async_sessionmaker(
     autocommit=False
 )
 
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
+async def get_db() -> AsyncGenerator[AsyncSession]:
     async with async_session_local() as session:
         yield session
 

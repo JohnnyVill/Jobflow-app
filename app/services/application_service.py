@@ -1,11 +1,7 @@
-from typing import ClassVar
-
-from fastapi import FastAPI, Depends
-
 from app.models.application import JobApplication
 from app.db.database import Application
 
-from sqlalchemy import select, delete
+from sqlalchemy import select, deletedd
 from sqlalchemy.ext.asyncio import AsyncSession
 
 

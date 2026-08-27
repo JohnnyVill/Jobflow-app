@@ -1,23 +1,19 @@
-from fastapi import APIRouter, HTTPException, Depends
-
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.database import get_db
 from app.models.application import JobApplication
 from app.services.application_service import (
-    create_application,
-    delete_application,
-    get_application,
-    get_applications,
+   create_application,
+   delete_application,
+   get_application,
+   get_applications,
 )
-
-from app.db.database import get_db
 
 applications_router = APIRouter(
     prefix="/applications",
     tags = ["applications"]
 )
-
-
 
 
 @applications_router.get("")

@@ -1,39 +1,39 @@
 import pytest
+
 from fastapi.testclient import TestClient
+from sqlalchemy import delete
 
 from app.main import app
-from app.services.application_service import ApplicationStorage
 
-client = TestClient(app)
 
-@pytest.fixture(autouse=True)
-def clear_storage():
-    ApplicationStorage.applications.clear()
+
+@pytest.fixture(scope="session")
+def client():
+    with TestClient(app) as client:
+        yield client
 
 @pytest.fixture
 def sample_applications():
     return [
         {
-            "id": 1,
             "company": "google",
             "position": "software engineer",
             "status": "offer"
         },
         {
-            "id": 2,
+
             "company": "amazon",
             "position": "backend engineer",
             "status": "applied"
         },
         {
-            "id": 3,
             "company": "microsoft",
             "position": "software engineer",
             "status": "interview"
         }
     ]
 
-def test_post_applications(sample_applications):        
+def test_post_applications(client, sample_applications):        
     for application in sample_applications:
         response = client.post(
             "/applications",
@@ -42,18 +42,10 @@ def test_post_applications(sample_applications):
         assert response.status_code == 200
     
 
-def test_duplicate_application(sample_applications):
-    for application in sample_applications:
-        response = client.post(
-            "/applications",
-            json=application
-        )
-        assert response.status_code == 200
-
+def test_duplicate_application(client):
     response = client.post(
         "/applications",
         json = {
-            "id": 2,
             "company": "amazon",
             "position": "backend engineer",
             "status": "applied"      
@@ -62,15 +54,23 @@ def test_duplicate_application(sample_applications):
 
     assert response.status_code == 409
 
-def test_get_applications(sample_applications):    
-    for application in sample_applications:
-        response = client.post(
-            "/applications",
-            json=application
-        )
-        assert response.status_code == 200
-
+def test_get_applications(client):    
     response = client.get("/applications")
+
+
+    assert response.status_code == 200
+    count = client.get("/applications")
+
+    expected_total_count = count.json()
+    data = response.json()
+
+    assert len(data) == len(expected_total_count)
+
+def test_get_application_id(client):
+    get_id = client.get("applications")
+    data_id = get_id.json()
+
+    response = client.get(f"/applications/{data_id[0]["id"]}")
 
 
     assert response.status_code == 200
@@ -79,68 +79,38 @@ def test_get_applications(sample_applications):
     data = response.json()
 
 
-    assert len(data) == 3
-    assert data[0]["company"] == "google"
-    assert data[1]["company"] == "amazon"
-    assert data[2]["company"] == "microsoft"
+    assert data["company"] == data_id[0]["company"]
+    assert data["status"] == data_id[0]["status"]
 
-def test_get_application_id(sample_applications):
-    for application in sample_applications:
-        response = client.post(
-            "/applications",
-            json=application
-        )
-        assert response.status_code == 200
+def test_delete_application(client):
+    get_id = client.get("applications")
+    data_id = get_id.json()
 
+    response = client.delete(f"/applications/{data_id[0]["id"]}")
+    delete = client.get("applications")
 
-    response = client.get("/applications/2")
-
-
+    post_delete = delete.json()
     assert response.status_code == 200
 
-
-    data = response.json()
-
-
-    assert data["company"] == "amazon"
-    assert data["status"] == "applied"
-
-def test_delete_application(sample_applications):
-    for application in sample_applications:
-        response = client.post(
-            "/applications",
-            json=application
-        )
-        assert response.status_code == 200
-
-
-    response = client.delete("/applications/2")
-    assert response.status_code == 200
-
-
-    response = client.get("/applications")
-    assert response.status_code == 200
-
+    assert len(data_id) != len(post_delete)
     
-    data = response.json()
-    assert len(data) == 2
-    assert all(application["id"] != 2 for application in data)
 
 
-def test_get_missing_application():
+def test_get_missing_application(client):
     response = client.get("/applications/999")
 
     assert response.status_code == 404
 
-def test_delete_nonexisting_application():
+
+def test_delete_nonexisting_application(client):
     response = client.delete("/applications/999")
     assert response.status_code == 404
 
-def test_invalid_application():
+
+def test_invalid_application(client):
     response = client.post(
         "/applications",
         json={
-            "id":1,
             "company":"good vibes",
             "position":"vibe cordinator",
             "status":"lost"

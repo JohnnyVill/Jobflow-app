@@ -17,7 +17,6 @@ async def create_application(application: JobApplication, db: AsyncSession):
                 status=application.status
             )
             db.add(new_application)
-            print(f"Inserted User ID: {new_application.id}, {new_application.company}")
             return new_application
     except IntegrityError:
         return None

@@ -1,16 +1,33 @@
 import pytest
+import pytest_asyncio
 
-from fastapi.testclient import TestClient
-from sqlalchemy import delete
-
+from httpx import AsyncClient, ASGITransport
+from sqlalchemy import text
+from app.db.database import async_session_local
 from app.main import app
 
 
 
-@pytest.fixture(scope="session")
-def client():
-    with TestClient(app) as client:
+@pytest_asyncio.fixture
+async def client():
+    transport = ASGITransport(app=app)
+
+    async with AsyncClient(
+        transport=transport,
+        base_url="http://test"
+    ) as client:
         yield client
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def clean_tables():
+    async with async_session_local() as db:
+        await db.execute(
+            text("TRUNCATE TABLE applications RESTART IDENTITY CASCADE")
+        )
+        await db.commit()
+
+    yield
 
 @pytest.fixture
 def sample_applications():
@@ -33,17 +50,28 @@ def sample_applications():
         }
     ]
 
-def test_post_applications(client, sample_applications):        
+
+async def test_post_applications(client, sample_applications):        
     for application in sample_applications:
-        response = client.post(
+        response = await client.post(
             "/applications",
             json=application
         )
         assert response.status_code == 200
     
 
-def test_duplicate_application(client):
-    response = client.post(
+async def test_duplicate_application(client, sample_applications):
+    #populate table with data
+    for application in sample_applications:
+        response = await client.post(
+            "/applications",
+            json=application
+        )
+        assert response.status_code == 200
+
+
+    #test            
+    response = await client.post(
         "/applications",
         json = {
             "company": "amazon",
@@ -54,40 +82,59 @@ def test_duplicate_application(client):
 
     assert response.status_code == 409
 
-def test_get_applications(client):    
-    response = client.get("/applications")
+async def test_get_applications(client, sample_applications):
+    #populate table with data
+    for application in sample_applications:
+        response = await client.post(
+            "/applications",
+            json=application
+        )
+        assert response.status_code == 200    
+    response = await client.get("/applications")
 
 
+    #test
     assert response.status_code == 200
-    count = client.get("/applications")
-
-    expected_total_count = count.json()
     data = response.json()
+    assert len(data) == len(sample_applications)
 
-    assert len(data) == len(expected_total_count)
+async def test_get_application_id(client, sample_applications):
+    #populate table with data
+    for application in sample_applications:
+        response = await client.post(
+            "/applications",
+            json=application
+        )
+        assert response.status_code == 200
 
-def test_get_application_id(client):
-    get_id = client.get("applications")
+    #test
+    get_id = await client.get("applications")
     data_id = get_id.json()
 
-    response = client.get(f"/applications/{data_id[0]["id"]}")
+    response = await client.get(f"/applications/{data_id[0]["id"]}")
 
 
     assert response.status_code == 200
-
-
     data = response.json()
-
-
     assert data["company"] == data_id[0]["company"]
     assert data["status"] == data_id[0]["status"]
 
-def test_delete_application(client):
-    get_id = client.get("applications")
+async def test_delete_application(client, sample_applications):
+    #populate table with data
+    for application in sample_applications:
+        response = await client.post(
+            "/applications",
+            json=application
+        )
+        assert response.status_code == 200
+
+
+    #test
+    get_id = await client.get("applications")
     data_id = get_id.json()
 
-    response = client.delete(f"/applications/{data_id[0]["id"]}")
-    delete = client.get("applications")
+    response = await client.delete(f"/applications/{data_id[0]["id"]}")
+    delete = await client.get("applications")
 
     post_delete = delete.json()
     assert response.status_code == 200
@@ -96,19 +143,19 @@ def test_delete_application(client):
     
 
 
-def test_get_missing_application(client):
-    response = client.get("/applications/999")
+async def test_get_missing_application(client):
+    response = await client.get("/applications/999")
 
     assert response.status_code == 404
 
 
-def test_delete_nonexisting_application(client):
-    response = client.delete("/applications/999")
+async def test_delete_nonexisting_application(client):
+    response = await client.delete("/applications/999")
     assert response.status_code == 404
 
 
-def test_invalid_application(client):
-    response = client.post(
+async def test_invalid_application(client):
+    response = await client.post(
         "/applications",
         json={
             "company":"good vibes",

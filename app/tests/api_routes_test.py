@@ -139,7 +139,11 @@ async def test_delete_application(client, sample_applications):
     post_delete = delete.json()
     assert response.status_code == 200
 
-    assert len(data_id) != len(post_delete)
+    assert len(post_delete) == len(sample_applications) - 1
+    assert all(
+        application["id"] != data_id[0]["id"]
+        for application in post_delete
+    )
     
 
 

@@ -3,7 +3,7 @@ import pytest_asyncio
 
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy import text
-from app.db.database import async_session_local
+from app.db.database import test_async_session_local
 from app.main import app
 
 
@@ -21,7 +21,7 @@ async def client():
 
 @pytest_asyncio.fixture(autouse=True)
 async def clean_tables():
-    async with async_session_local() as db:
+    async with test_async_session_local() as db:
         await db.execute(
             text("TRUNCATE TABLE applications RESTART IDENTITY CASCADE")
         )

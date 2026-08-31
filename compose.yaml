@@ -7,6 +7,7 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/jobflow
+      TEST_DATABASE_URL: postgresql+asyncpg://postgres:test_postgres@test_db:5433/test_jobflow
     depends_on:
       db:
         condition: service_healthy
@@ -32,5 +33,25 @@ services:
       timeout: 5s
       retries: 5
 
+  test_db:
+    image: postgres:17
+    container_name: pg_test_container
+    environment:
+      POSTGRES_USER: test_postgres
+      POSTGRES_PASSWORD: test_postgres
+      POSTGRES_DB: test_jobflow
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U test_postgres -d test_jobflow
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   postgres_data:
+  postgres_test_data:

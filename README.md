@@ -27,9 +27,9 @@ provides a REST API for managing job applications using in-memory storage.
 - HTTPX2
 - uv
 - Docker
-
-PostgreSQL, SQLAlchemy, and Alembic will be introduced as the persistence
-layer is developed.
+- PostgreSQL,
+- SQLAlchemy
+- Alembic
 
 ## Project Structure
 
@@ -93,8 +93,10 @@ http://localhost:8000/docs
 
 ## Run Tests
 
+make sure docker container is running
+
 ```bash
-uv run pytest
+docker compose exev api uv run -m pytest
 ```
 
 ## Project Status
@@ -109,9 +111,6 @@ JobFlow is currently under active development.
 - Service/router/model separation
 - HTTP error handling
 - Automated API tests
-
-### Next
-
 - PostgreSQL persistence
 - SQLAlchemy ORM
 - Database migrations with Alembic

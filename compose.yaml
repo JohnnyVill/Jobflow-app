@@ -7,9 +7,11 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/jobflow
-      TEST_DATABASE_URL: postgresql+asyncpg://postgres:test_postgres@test_db:5433/test_jobflow
+      TEST_DATABASE_URL: postgresql+asyncpg://test_postgres:test_postgres@test_db:5432/test_jobflow
     depends_on:
       db:
+        condition: service_healthy
+      test_db:
         condition: service_healthy
     volumes:
       - ./alembic:/app/alembic

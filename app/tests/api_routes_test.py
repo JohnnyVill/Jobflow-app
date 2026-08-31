@@ -3,10 +3,15 @@ import pytest_asyncio
 
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy import text
-from app.db.database import test_async_session_local
+from app.db.database import test_async_session_local, get_db
 from app.main import app
 
+async def override_get_db():
+    async with test_async_session_local() as session:
+        yield session
 
+
+app.dependency_overrides[get_db] = override_get_db
 
 @pytest_asyncio.fixture
 async def client():

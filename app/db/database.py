@@ -21,7 +21,7 @@ async_session_local = async_sessionmaker(
     autocommit=False
 )
 
-test_async_session_local = async_sessionmaker(
+async_test_session_local = async_sessionmaker(
     bind=test_engine,
     expire_on_commit=False,
     autoflush=False,

@@ -14,3 +14,7 @@ class JobApplication(BaseModel):
     company: str 
     position: str 
     status: ApplicationStatus
+
+class UserCreation(BaseModel):
+    email: str
+    password: str

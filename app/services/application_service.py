@@ -1,5 +1,5 @@
-from app.models.application import JobApplication
-from app.db.database import Application
+from app.models.application import JobApplication, UserCreation
+from app.db.database import Application, User
 
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,6 +20,23 @@ async def create_application(application: JobApplication, db: AsyncSession):
             return new_application
     except IntegrityError:
         return None
+
+
+async def create_user(user: UserCreation, db: AsyncSession):
+    try:
+        async with db.begin():
+            new_user = User(
+                email = user.email,
+                password = user.password
+            )
+            db.add(new_user)
+            return new_user
+    except IntegrityError:
+        return None
+
+async def get_users(db:AsyncSession):
+    users = await db.execute(select(User))
+    return users.scalars().all()
 
 async def get_applications(db: AsyncSession):
     applications = await db.execute(select(Application))

@@ -30,6 +30,9 @@ async def clean_tables():
         await db.execute(
             text("TRUNCATE TABLE applications RESTART IDENTITY CASCADE")
         )
+        await db.execute(
+            text("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
+        )
         await db.commit()
 
     yield
@@ -56,6 +59,48 @@ def sample_applications():
     ]
 
 
+@pytest.fixture
+def sample_users():
+    return [
+        {
+            "email": "joe@gmail.com",
+            "password_hash": "softwareengineer",
+        },
+        {
+
+            "email": "doe@yahoo.com",
+            "password_hash": "backendengineer",
+        },
+        {
+            "email": "jane@gmail.com",
+            "password_hash": "frontendengineer",
+        }
+    ]
+
+
+async def test_post_users(client, sample_users):
+    for user in sample_users:
+        response = await client.post(
+            "/users",
+            json=user
+        )
+        assert response.status_code == 200
+
+async def test_get_users(client, sample_users):
+    for user in sample_users:
+        response = await client.post(
+            "/users",
+            json=user
+        )
+        assert response.status_code == 200
+
+    response = await client.get(
+        "/users"
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == len(sample_users)
+
 async def test_post_applications(client, sample_applications):        
     for application in sample_applications:
         response = await client.post(
@@ -63,7 +108,7 @@ async def test_post_applications(client, sample_applications):
             json=application
         )
         assert response.status_code == 200
-    
+
 
 async def test_duplicate_application(client, sample_applications):
     #populate table with data

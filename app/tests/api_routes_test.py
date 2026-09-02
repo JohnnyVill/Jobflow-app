@@ -64,16 +64,16 @@ def sample_users():
     return [
         {
             "email": "joe@gmail.com",
-            "password_hash": "softwareengineer",
+            "password": "softwareengineer",
         },
         {
 
             "email": "doe@yahoo.com",
-            "password_hash": "backendengineer",
+            "password": "backendengineer",
         },
         {
             "email": "jane@gmail.com",
-            "password_hash": "frontendengineer",
+            "password": "frontendengineer",
         }
     ]
 

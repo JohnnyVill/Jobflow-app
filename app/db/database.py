@@ -1,11 +1,14 @@
 import os
 import datetime
+import bcrypt
 from collections.abc import AsyncGenerator
 
 from sqlalchemy import Enum, String, UniqueConstraint, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.types import TIMESTAMP
+
 
 from app.models.application import ApplicationStatus
 
@@ -67,6 +70,24 @@ class User(Base):
         deferred=True, 
         nullable=False
     )
+
+    @hybrid_property
+    def password(self):
+        """Getter prevents reading the plain text password"""
+        raise AttributeError("Password is not a readable attribute")
+
+    @password.setter
+    def password(self, plaintext_password: str) -> None:
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(plaintext_password.encode('utf-8'), salt)
+        self.password_hash = hashed.decode('utf-8')
+
+    def check_password(self, plaintext_password: str) -> bool:
+        return bcrypt.checkpw(
+            plaintext_password.encode('utf-8'),
+            self.password_hash.encode('utf-8')
+        )    
+        
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), 
         nullable = False, 

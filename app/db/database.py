@@ -1,9 +1,11 @@
 import os
+import datetime
 from collections.abc import AsyncGenerator
 
-from sqlalchemy import Enum, String, UniqueConstraint
+from sqlalchemy import Enum, String, UniqueConstraint, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.types import TIMESTAMP
 
 from app.models.application import ApplicationStatus
 
@@ -49,3 +51,24 @@ class Application(Base):
     company: Mapped[str] = mapped_column(String(255), nullable=False)
     position: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[ApplicationStatus] = mapped_column(Enum(ApplicationStatus), nullable=False)
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(
+        String(255), 
+        nullable=False, 
+        unique=True
+    )
+    password_hash: Mapped[str] = mapped_column(
+        String(255), 
+        deferred=True, 
+        nullable=False
+    )
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=True), 
+        nullable = False, 
+        server_default=text('now()')
+    )

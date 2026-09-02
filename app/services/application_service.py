@@ -25,10 +25,9 @@ async def create_application(application: JobApplication, db: AsyncSession):
 async def create_user(user: UserCreation, db: AsyncSession):
     try:
         async with db.begin():
-            new_user = User(
-                email = user.email,
-                password_hash = user.password
-            )
+            new_user = User(email = user.email)
+            new_user.password = user.password
+
             db.add(new_user)
             return new_user
     except IntegrityError:

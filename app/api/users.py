@@ -19,7 +19,7 @@ async def make_user(user: UserCreation, db: AsyncSession = Depends(get_db)):
     success = await create_user(user, db)
     if success:
         return success
-    raise HTTPException(status_code=409, detail="Duplicate Request")
+    raise HTTPException(status_code=409, detail="Email already in use")
 
 @users_router.get("")
 async def get_all_users(db: AsyncSession = Depends(get_db)):

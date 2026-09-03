@@ -2,8 +2,9 @@ import pytest
 import pytest_asyncio
 
 from httpx import AsyncClient, ASGITransport
-from sqlalchemy import text
-from app.db.database import async_test_session_local, get_db
+from sqlalchemy import text, select
+from sqlalchemy.orm import undefer
+from app.db.database import async_test_session_local, get_db, User
 from app.main import app
 
 async def override_get_db():
@@ -79,12 +80,30 @@ def sample_users():
 
 
 async def test_post_users(client, sample_users):
+    plaintext_password = "softwareengineer"
     for user in sample_users:
         response = await client.post(
             "/users",
             json=user
         )
         assert response.status_code == 200
+        data = response.json()
+
+        assert "password" not in data
+        assert "password_hash" not in data
+    
+    async with async_test_session_local() as db:
+        result = await db.execute(
+            select(User)
+            .options(undefer(User.password_hash))
+            .where(User.email == "joe@gmail.com")
+        )
+        stored_user = result.scalar_one()
+
+        assert stored_user.password_hash != plaintext_password
+        assert stored_user.password_hash.startswith("$2")
+        assert stored_user.check_password(plaintext_password) is True
+        assert stored_user.check_password("wrong_password") is False
 
 async def test_get_users(client, sample_users):
     for user in sample_users:
@@ -101,6 +120,27 @@ async def test_get_users(client, sample_users):
     data = response.json()
     assert len(data) == len(sample_users)
 
+
+async def test_duplicate_email(client, sample_users):
+    for user in sample_users:
+        response = await client.post(
+            "/users",
+            json=user
+        )
+        assert response.status_code == 200
+
+    #test duplicate
+
+    duplicate = await client.post(
+        "/users",
+        json= {
+        
+            "email": "doe@yahoo.com",
+            "password": "backendengineer",
+        }
+    )
+    assert duplicate.status_code == 409
+    
 async def test_post_applications(client, sample_applications):        
     for application in sample_applications:
         response = await client.post(

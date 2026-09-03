@@ -113,9 +113,7 @@ async def test_get_users(client, sample_users):
         )
         assert response.status_code == 200
 
-    response = await client.get(
-        "/users"
-    )
+    response = await client.get("/users")
     assert response.status_code == 200
     data = response.json()
     assert len(data) == len(sample_users)

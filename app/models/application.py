@@ -24,4 +24,4 @@ class UserResponse(BaseModel):
     email:str
     created_at:datetime
 
-    model_config = ConfigDict(for_attributes=True)
+    model_config = ConfigDict(from_attributes=True)

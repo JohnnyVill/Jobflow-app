@@ -4,6 +4,7 @@ from app.db.database import Application, User
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import undefer
 
 
 
@@ -38,6 +39,7 @@ async def authenticate_user(credentials: UserCreation,db:AsyncSession):
     #Selecting the User table and checking if the credential pass match and email the table
     result = await db.execute(
         select(User)
+        .options(undefer(User.password_hash))
         .where(User.email == credentials.email)
     )
 

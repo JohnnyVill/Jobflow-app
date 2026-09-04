@@ -21,7 +21,7 @@ async def register(user: UserCreation, db: AsyncSession = Depends(get_db)):
         return success
     raise HTTPException(status_code=409, detail="Email already in use")
 
-@auth_router.post("/login", response_model=list[UserResponse])
+@auth_router.post("/login", response_model=UserResponse)
 async def login(user: UserCreation, db: AsyncSession = Depends(get_db)):
     authenticated_user = await authenticate_user(user, db)
     if  authenticated_user:

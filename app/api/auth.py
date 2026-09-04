@@ -26,4 +26,4 @@ async def login(user: UserCreation, db: AsyncSession = Depends(get_db)):
     authenticated_user = await authenticate_user(user, db)
     if  authenticated_user:
         return authenticated_user
-    raise HTTPException(status_code=404, detail="Invalid email or password")
+    raise HTTPException(status_code=401, detail="Invalid email or password")

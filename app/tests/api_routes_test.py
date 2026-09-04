@@ -125,7 +125,7 @@ async def test_login(client, sample_users):
     data = login.json()
     assert user_login["email"] == data["email"]
 
-async def incorrect_login(client, sample_users):
+async def test_incorrect_login(client, sample_users):
     for user in sample_users:
         response = await client.post(
             "/auth/register",
@@ -140,12 +140,11 @@ async def incorrect_login(client, sample_users):
         "/auth/login",
         json=user_login
     )
-    assert login.status_code != 200
-    data = login.json()
-    assert user_login["email"] != data["email"]
+    assert login.status_code == 401
+    assert login.json()["detail"] == "Invalid email or password"
+    
 
-
-async def nonuser_login(client, sample_users):
+async def test_nonuser_login(client, sample_users):
     for user in sample_users:
         response = await client.post(
             "/auth/register",
@@ -160,11 +159,12 @@ async def nonuser_login(client, sample_users):
         "/auth/login",
         json=user_login
     )
+    assert login.status_code == 401
     data = login.json()
-    assert data.status_code != 200
+    assert data == {
+        "detail": "Invalid email or password"
+    }
      
-
-
 
 async def test_duplicate_email(client, sample_users):
     for user in sample_users:

@@ -33,9 +33,9 @@ async def create_user(user: UserCreation, db: AsyncSession):
     except IntegrityError:
         return None
 
-async def get_users(db:AsyncSession):
-    users = await db.execute(select(User))
-    return users.scalars().all()
+async def get_user(user: UserCreation,db:AsyncSession):
+    users = await db.execute(select(user))
+    return users.scalars().one()
 
 async def get_applications(db: AsyncSession):
     applications = await db.execute(select(Application))

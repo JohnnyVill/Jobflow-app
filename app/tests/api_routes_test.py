@@ -7,13 +7,13 @@ from sqlalchemy.orm import undefer
 from app.db.database import async_test_session_local, get_db, User
 from app.main import app
 
+#Override get_db to use the test session 
 async def override_get_db():
     async with async_test_session_local() as session:
         yield session
-
-
 app.dependency_overrides[get_db] = override_get_db
 
+#use this local testing area to run test 
 @pytest_asyncio.fixture
 async def client():
     transport = ASGITransport(app=app)
@@ -24,7 +24,7 @@ async def client():
     ) as client:
         yield client
 
-
+#resets the table for every test
 @pytest_asyncio.fixture(autouse=True)
 async def clean_tables():
     async with async_test_session_local() as db:
@@ -38,6 +38,7 @@ async def clean_tables():
 
     yield
 
+#Data used to every application test
 @pytest.fixture
 def sample_applications():
     return [
@@ -59,7 +60,7 @@ def sample_applications():
         }
     ]
 
-
+#Data used for every user test
 @pytest.fixture
 def sample_users():
     return [
@@ -83,7 +84,7 @@ async def test_post_users(client, sample_users):
     plaintext_password = "softwareengineer"
     for user in sample_users:
         response = await client.post(
-            "/users",
+            "/auth/register",
             json=user
         )
         assert response.status_code == 200
@@ -108,21 +109,27 @@ async def test_post_users(client, sample_users):
 async def test_get_users(client, sample_users):
     for user in sample_users:
         response = await client.post(
-            "/users",
+            "/auth/register",
             json=user
         )
         assert response.status_code == 200
-
-    response = await client.get("/users")
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data) == len(sample_users)
+    user_login = {
+        "email": "joe@gmail.com",
+        "password": "softwareengineer",
+    }
+    login = await client.get(
+        "/auth/login",
+        json=user_login
+    )
+    assert login.status_code == 200
+    data = login.json()
+    assert user_login.email == data.email
 
 
 async def test_duplicate_email(client, sample_users):
     for user in sample_users:
         response = await client.post(
-            "/users",
+            "/auth/register",
             json=user
         )
         assert response.status_code == 200
@@ -130,7 +137,7 @@ async def test_duplicate_email(client, sample_users):
     #test duplicate
 
     duplicate = await client.post(
-        "/users",
+        "/auth/register",
         json= {
         
             "email": "doe@yahoo.com",

@@ -5,8 +5,8 @@ from app.db.database import get_db
 from app.models.application import UserCreation,UserResponse
 
 from app.services.application_service import (
-    create_user,
-    get_user
+    register_user,
+    authenticate_user
 )
 
 auth_router = APIRouter(
@@ -16,14 +16,14 @@ auth_router = APIRouter(
 
 @auth_router.post("/register", response_model=UserResponse)
 async def register(user: UserCreation, db: AsyncSession = Depends(get_db)):
-    success = await create_user(user, db)
+    success = await register_user(user, db)
     if success:
         return success
     raise HTTPException(status_code=409, detail="Email already in use")
 
-@auth_router.get("/login", response_model=list[UserResponse])
+@auth_router.post("/login", response_model=list[UserResponse])
 async def login(user: UserCreation, db: AsyncSession = Depends(get_db)):
-    users = await get_user(user, db)
-    if  users:
-        return users
-    raise HTTPException(status_code=404, detail="Users not found")
+    authenticated_user = await authenticate_user(user, db)
+    if  authenticated_user:
+        return authenticated_user
+    raise HTTPException(status_code=404, detail="Invalid email or password")

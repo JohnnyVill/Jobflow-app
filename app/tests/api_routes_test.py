@@ -80,7 +80,7 @@ def sample_users():
     ]
 
 
-async def test_post_users(client, sample_users):
+async def test_registration(client, sample_users):
     plaintext_password = "softwareengineer"
     for user in sample_users:
         response = await client.post(
@@ -106,7 +106,7 @@ async def test_post_users(client, sample_users):
         assert stored_user.check_password(plaintext_password) is True
         assert stored_user.check_password("wrong_password") is False
 
-async def test_get_users(client, sample_users):
+async def test_login(client, sample_users):
     for user in sample_users:
         response = await client.post(
             "/auth/register",
@@ -117,13 +117,13 @@ async def test_get_users(client, sample_users):
         "email": "joe@gmail.com",
         "password": "softwareengineer",
     }
-    login = await client.get(
+    login = await client.post(
         "/auth/login",
         json=user_login
     )
     assert login.status_code == 200
     data = login.json()
-    assert user_login.email == data.email
+    assert user_login["email"] == data["email"]
 
 
 async def test_duplicate_email(client, sample_users):

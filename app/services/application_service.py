@@ -22,7 +22,7 @@ async def create_application(application: JobApplication, db: AsyncSession):
         return None
 
 
-async def create_user(user: UserCreation, db: AsyncSession):
+async def register_user(user: UserCreation, db: AsyncSession):
     try:
         async with db.begin():
             new_user = User(email = user.email)
@@ -33,9 +33,23 @@ async def create_user(user: UserCreation, db: AsyncSession):
     except IntegrityError:
         return None
 
-async def get_user(user: UserCreation,db:AsyncSession):
-    users = await db.execute(select(user))
-    return users.scalars().one()
+
+async def authenticate_user(credentials: UserCreation,db:AsyncSession):
+    #Selecting the User table and checking if the credential pass match and email the table
+    result = await db.execute(
+        select(User)
+        .where(User.email == credentials.email)
+    )
+
+    user = result.scalar_one_or_none()
+    #check if user is valid and if the password is valid for that user
+    if user is None:
+        return None
+    if not user.check_password(credentials.password):
+        return None
+
+    return user
+
 
 async def get_applications(db: AsyncSession):
     applications = await db.execute(select(Application))

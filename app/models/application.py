@@ -1,7 +1,6 @@
-from datetime import datetime
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 
 class ApplicationStatus(StrEnum):
@@ -15,14 +14,3 @@ class JobApplication(BaseModel):
     company: str 
     position: str 
     status: ApplicationStatus
-
-class UserCreation(BaseModel):
-    email: str
-    password: str
-
-class UserResponse(BaseModel):
-    id:int
-    email:str
-    created_at:datetime
-
-    model_config = ConfigDict(from_attributes=True)

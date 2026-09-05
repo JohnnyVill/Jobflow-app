@@ -4,7 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import undefer
 
 from app.db.database import Application, User
-from app.models.application import JobApplication, UserCreation
+from app.models.application import JobApplication
+from app.models.users import UserCreation
 
 
 async def create_application(application: JobApplication, db: AsyncSession):

@@ -4,7 +4,8 @@ import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy import text, select
 from sqlalchemy.orm import undefer
-from app.db.database import async_test_session_local, get_db, User
+from app.db.database import get_db, User
+from app.tests.conftest import async_test_session_local
 from app.main import app
 
 #Override get_db to use the test session 

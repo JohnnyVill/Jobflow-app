@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,15 +12,17 @@ auth_router = APIRouter(
     tags=["auth"]
 )
 
+DbSession = Annotated[AsyncSession, Depends(get_db)]
+
 @auth_router.post("/register", response_model=UserResponse)
-async def register(user: UserCreation, db: AsyncSession = Depends(get_db)):
+async def register(user: UserCreation, db: DbSession):
     success = await register_user(user, db)
     if success:
         return success
     raise HTTPException(status_code=409, detail="Email already in use")
 
 @auth_router.post("/login", response_model=UserResponse)
-async def login(user: UserCreation, db: AsyncSession = Depends(get_db)):
+async def login(user: UserCreation, db: DbSession):
     authenticated_user = await authenticate_user(user, db)
     if  authenticated_user:
         return authenticated_user

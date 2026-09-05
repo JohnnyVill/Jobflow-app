@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,15 +17,16 @@ applications_router = APIRouter(
     tags = ["applications"]
 )
 
+DbSession = Annotated[AsyncSession, Depends(get_db)]
 
 @applications_router.get("")
-async def get_all_applications(db: AsyncSession = Depends(get_db)):
+async def get_all_applications(db: DbSession):
    applications = await get_applications(db)
    return applications
 
 
 @applications_router.get("/{application_id}")
-async def get_app(application_id : int, db: AsyncSession = Depends(get_db)):
+async def get_app(application_id : int, db: DbSession):
     application = await get_application(application_id, db)
 
     if application:
@@ -32,7 +35,7 @@ async def get_app(application_id : int, db: AsyncSession = Depends(get_db)):
 
 
 @applications_router.post("")
-async def make_application(application : JobApplication, db: AsyncSession = Depends(get_db)):
+async def make_application(application : JobApplication, db: DbSession):
     success = await create_application(application, db)
 
     if success:
@@ -41,7 +44,7 @@ async def make_application(application : JobApplication, db: AsyncSession = Depe
 
 
 @applications_router.delete("/{application_id}")
-async def delete(application_id: int, db: AsyncSession = Depends(get_db)):
+async def delete(application_id: int, db: DbSession):
     success = await delete_application(application_id, db)
     if success:
         return {"message": "Item deleted"}

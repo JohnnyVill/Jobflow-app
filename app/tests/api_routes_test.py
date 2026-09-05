@@ -1,43 +1,11 @@
 import pytest
-import pytest_asyncio
-
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy import text, select
+from sqlalchemy import select
 from sqlalchemy.orm import undefer
-from app.db.database import get_db, User
+from app.db.database import User
 from app.tests.conftest import async_test_session_local
-from app.main import app
 
-#Override get_db to use the test session 
-async def override_get_db():
-    async with async_test_session_local() as session:
-        yield session
-app.dependency_overrides[get_db] = override_get_db
 
-#use this local testing area to run test 
-@pytest_asyncio.fixture
-async def client():
-    transport = ASGITransport(app=app)
 
-    async with AsyncClient(
-        transport=transport,
-        base_url="http://test"
-    ) as client:
-        yield client
-
-#resets the table for every test
-@pytest_asyncio.fixture(autouse=True)
-async def clean_tables():
-    async with async_test_session_local() as db:
-        await db.execute(
-            text("TRUNCATE TABLE applications RESTART IDENTITY CASCADE")
-        )
-        await db.execute(
-            text("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
-        )
-        await db.commit()
-
-    yield
 
 #Data used to every application test
 @pytest.fixture

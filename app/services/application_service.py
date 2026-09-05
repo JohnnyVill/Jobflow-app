@@ -1,11 +1,10 @@
-from app.models.application import JobApplication, UserCreation
-from app.db.database import Application, User
-
-from sqlalchemy import select, delete
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import undefer
 
+from app.db.database import Application, User
+from app.models.application import JobApplication, UserCreation
 
 
 async def create_application(application: JobApplication, db: AsyncSession):

@@ -1,10 +1,9 @@
 import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import undefer
+
 from app.db.database import User
 from app.tests.conftest import async_test_session_local
-
-
 
 
 #Data used to every application test

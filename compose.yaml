@@ -9,6 +9,8 @@ services:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/jobflow
       TEST_DATABASE_URL: postgresql+asyncpg://test_postgres:test_postgres@test_db:5432/test_jobflow
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
 
     depends_on:
       db:

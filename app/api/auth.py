@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
 from app.models.users import UserCreation, UserResponse
 from app.services.application_service import authenticate_user, register_user
+from app.core.security import data
 
 auth_router = APIRouter(
     prefix="/auth", 
@@ -25,5 +26,6 @@ async def register(user: UserCreation, db: DbSession):
 async def login(user: UserCreation, db: DbSession):
     authenticated_user = await authenticate_user(user, db)
     if  authenticated_user:
+        data["payload"] = authenticate_user["id"]
         return authenticated_user
     raise HTTPException(status_code=401, detail="Invalid email or password")

@@ -1,3 +1,4 @@
+#This are test configurations that are automatically ran when test are ran
 import os
 
 import pytest_asyncio

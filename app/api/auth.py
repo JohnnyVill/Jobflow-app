@@ -26,6 +26,9 @@ async def register(user: UserCreation, db: DbSession):
 async def login(user: UserCreation, db: DbSession):
     authenticated_user = await authenticate_user(user, db)
     if  authenticated_user:
-        create_access_token(authenticated_user)
-        return authenticated_user
+        token = create_access_token(authenticated_user)
+        return {
+            "access_token": token,
+            "token_type": "bearer"
+        }
     raise HTTPException(status_code=401, detail="Invalid email or password")

@@ -10,8 +10,7 @@ algorithm_type = os.getenv("ALGORITHM")
 
 def create_access_token(user: UserResponse):
     data = {
-    "sub":str(user["id"]),
-    "token_type":"bearer"
+        "sub":str(user.id),
     }
 
     token = jwt.encode(

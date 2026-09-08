@@ -91,7 +91,10 @@ async def test_login(client, sample_users):
     )
     assert login.status_code == 200
     data = login.json()
-    assert user_login.access_token == data.access_token
+    assert "access_token" in data
+    assert data["token_type"] == "bearer"
+    assert isinstance(data["access_token"], str)
+    assert len(data["access_token"]) > 0
 
 async def test_incorrect_login(client, sample_users):
     for user in sample_users:

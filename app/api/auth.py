@@ -7,6 +7,7 @@ from app.db.database import get_db
 from app.models.users import UserCreation, UserResponse
 from app.services.application_service import authenticate_user, register_user
 from app.core.security import create_access_token
+from app.models.token_response import TokenResponse
 
 auth_router = APIRouter(
     prefix="/auth", 
@@ -22,7 +23,7 @@ async def register(user: UserCreation, db: DbSession):
         return success
     raise HTTPException(status_code=409, detail="Email already in use")
 
-@auth_router.post("/login", response_model=UserResponse)
+@auth_router.post("/login", response_model=TokenResponse)
 async def login(user: UserCreation, db: DbSession):
     authenticated_user = await authenticate_user(user, db)
     if  authenticated_user:

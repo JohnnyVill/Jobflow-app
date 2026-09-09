@@ -1,10 +1,13 @@
 import pytest
+import jwt
 from sqlalchemy import select
 from sqlalchemy.orm import undefer
+from datetime import datetime, timedelta, timezone
+
 
 from app.db.database import User
 from app.tests.conftest import async_test_session_local
-
+from app.core.security import key, token_algorithm
 
 
 #Data used to every application test
@@ -177,6 +180,51 @@ async def test_get_user(client, sample_users):
     assert response.status_code == 200
     assert response.json()["email"] == "joe@gmail.com"
 
+
+async def test_expired_token(client, sample_users):
+    expired_payload = {
+        "sub": "1",
+        "exp": datetime.now(timezone.utc) - timedelta(minutes=1)
+    }
+
+    expired_token = jwt.encode(
+        expired_payload,
+        key,
+        algorithm=token_algorithm
+    )
+
+    response = await client.get(
+        "/auth/me",
+        headers={
+            "Authorization": f"Bearer {expired_token}"
+        }
+    )
+
+    assert response.status_code == 401
+
+
+async def test_unknown_subject(client, sample_users):
+    payload = {
+        "sub": "99999",
+        "exp": datetime.now(timezone.utc) + timedelta(minutes=30)
+    }
+
+    token = jwt.encode(
+        payload,
+        key,
+        algorithm=token_algorithm
+    )
+
+    response = await client.get(
+        "/auth/me",
+        headers={
+            "Authorization": f"Bearer {token}"
+        }
+    )
+
+    assert response.status_code == 401
+
+    
 async def test_duplicate_email(client, sample_users):
     for user in sample_users:
         response = await client.post(

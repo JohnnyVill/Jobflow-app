@@ -7,13 +7,12 @@ from app.models.token_response import TokenData
 
 from app.db.database import get_db
 from app.models.users import UserCreation, UserResponse
-from app.services.application_service import authenticate_user, register_user
 from app.core.security import create_access_token
 from app.models.token_response import TokenResponse
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from app.core.security import key,token_algorithm
+from fastapi.security import OAuth2PasswordBearer
+from app.core.security import key, token_algorithm
 from jwt.exceptions import InvalidTokenError
-from app.services.application_service import get_user
+from app.services.auth_service import get_user, register_user, authenticate_user
 
 auth_router = APIRouter(
     prefix="/auth", 
@@ -56,7 +55,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db:Asy
         token_data = TokenData(user_id = user_id)
     except InvalidTokenError:
         raise credentials_exception
-    user = await get_user(user_id=token_data.user_id,db=db)
+    user = await get_user(user_id=int(token_data.user_id),db=db)
     if user is None:
         raise credentials_exception
     return user

@@ -145,12 +145,13 @@ async def test_get_user(client, sample_users):
         assert response.status_code == 200
     user_login = {
         "email": "joe@gmail.com",
-        "password": "softengineer",
+        "password": "softwareengineer",
     }
     login = await client.post(
         "/auth/login",
         json=user_login
     )
+    assert login.status_code == 200
     token = login.json()["access_token"]
     response = await client.get(
         "/auth/me",

@@ -2,7 +2,7 @@ import datetime
 import os
 from collections.abc import AsyncGenerator
 
-import bcrypt
+from pwdlib import PasswordHash
 from sqlalchemy import Enum, String, UniqueConstraint, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -61,7 +61,6 @@ class User(Base):
         deferred=True, 
         nullable=False
     )
-
     @hybrid_property
     def password(self):
         """Getter prevents reading the plain text password"""
@@ -69,15 +68,13 @@ class User(Base):
 
     @password.setter
     def password(self, plaintext_password: str) -> None:
-        salt = bcrypt.gensalt()
-        hashed = bcrypt.hashpw(plaintext_password.encode('utf-8'), salt)
-        self.password_hash = hashed.decode('utf-8')
+        password_hash = PasswordHash.recommended()
+        hashed = password_hash.hash(plaintext_password)
+        self.password_hash = hashed
 
     def check_password(self, plaintext_password: str) -> bool:
-        return bcrypt.checkpw(
-            plaintext_password.encode('utf-8'),
-            self.password_hash.encode('utf-8')
-        )    
+        password_hash = PasswordHash.recommended()
+        return password_hash.verify(plaintext_password, self.password_hash)
         
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), 

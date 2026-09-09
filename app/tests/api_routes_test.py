@@ -70,7 +70,6 @@ async def test_registration(client, sample_users):
         stored_user = result.scalar_one()
 
         assert stored_user.password_hash != plaintext_password
-        assert stored_user.password_hash.startswith("$2")
         assert stored_user.check_password(plaintext_password) is True
         assert stored_user.check_password("wrong_password") is False
 

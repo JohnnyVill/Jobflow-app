@@ -1,4 +1,4 @@
-from app.db.database import Application, User
+from app.db.database import User
 from app.models.users import UserCreation
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError

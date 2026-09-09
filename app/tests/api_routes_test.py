@@ -136,6 +136,21 @@ async def test_nonuser_login(client, sample_users):
         "detail": "Invalid email or password"
     }
 
+async def test_missing_token(client):
+    response = await client.get("/auth/me")
+
+    assert response.status_code == 401
+
+async def test_malformed_token(client):
+    response = await client.get(
+        "/auth/me",
+        headers={
+            "Authorization": "Bearer this-is-not-a-valid-token"
+        }
+    )
+
+    assert response.status_code == 401
+
 async def test_get_user(client, sample_users):
     for user in sample_users:
         response = await client.post(

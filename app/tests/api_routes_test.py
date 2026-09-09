@@ -181,7 +181,7 @@ async def test_get_user(client, sample_users):
     assert response.json()["email"] == "joe@gmail.com"
 
 
-async def test_expired_token(client, sample_users):
+async def test_expired_token(client):
     expired_payload = {
         "sub": "1",
         "exp": datetime.now(timezone.utc) - timedelta(minutes=1)
@@ -203,7 +203,7 @@ async def test_expired_token(client, sample_users):
     assert response.status_code == 401
 
 
-async def test_unknown_subject(client, sample_users):
+async def test_unknown_subject(client):
     payload = {
         "sub": "99999",
         "exp": datetime.now(timezone.utc) + timedelta(minutes=30)

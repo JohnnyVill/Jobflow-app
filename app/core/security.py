@@ -10,7 +10,7 @@ key = os.getenv("JWT_SECRET_KEY")
 token_algorithm = os.getenv("JWT_ALGORITHM")
 expires_in = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES",30))
 data = {
-    "sub":str,
+    "sub":int,
     "exp": expires_in
 }
 
@@ -18,7 +18,7 @@ def create_access_token(user: UserResponse):
     to_encode = data.copy()
     expiration = datetime.now(timezone.utc) + timedelta(minutes=expires_in)
     to_encode.update({
-        "sub": str(user.id),
+        "sub": user.id,
         "exp": expiration
     })
 

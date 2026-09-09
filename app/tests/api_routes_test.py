@@ -4,6 +4,7 @@ from sqlalchemy.orm import undefer
 
 from app.db.database import User
 from app.tests.conftest import async_test_session_local
+from app.services.application_service import get_current_user
 
 
 #Data used to every application test
@@ -134,7 +135,25 @@ async def test_nonuser_login(client, sample_users):
     assert data == {
         "detail": "Invalid email or password"
     }
-     
+
+async def test_get_user(client, sample_users):
+    for user in sample_users:
+        response = await client.post(
+            "/auth/register",
+            json=user
+        )
+        assert response.status_code == 200
+    user_login = {
+        "email": "joe@gmail.com",
+        "password": "softengineer",
+        }
+    login = await client.post(
+        "/auth/login",
+        json=user_login
+    )
+    get_user = await get_current_user(login)
+    data = get_user
+    assert data
 
 async def test_duplicate_email(client, sample_users):
     for user in sample_users:

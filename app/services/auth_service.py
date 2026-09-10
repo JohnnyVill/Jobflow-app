@@ -15,7 +15,7 @@ from app.models.token_response import TokenData
 from app.models.users import UserCreation
 
 DbSession = Annotated[AsyncSession, Depends(get_db)]
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 async def register_user(user: UserCreation, db: AsyncSession):
     try:

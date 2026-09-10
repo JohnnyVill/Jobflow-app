@@ -177,8 +177,11 @@ async def test_get_user(client, sample_users):
             "Authorization": f"Bearer {token}"
         }
     )
-    assert response.status_code == 200
-    assert response.json()["email"] == "joe@gmail.com"
+    data = response.json()
+
+    assert data["email"] == "joe@gmail.com"
+    assert "password_hash" not in data
+    assert "password" not in data
 
 
 async def test_expired_token(client):

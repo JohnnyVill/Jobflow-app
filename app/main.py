@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from app.api.applications import applications_router
 from app.api.auth import auth_router
+from app.api.users import users_router
 
 app = FastAPI(
     title="Jobflow API",
@@ -14,3 +15,4 @@ def root() -> dict[str, str]:
 
 app.include_router(applications_router)
 app.include_router(auth_router)
+app.include_router(users_router)

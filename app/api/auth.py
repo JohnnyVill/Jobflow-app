@@ -20,7 +20,7 @@ auth_router = APIRouter(
 )
 
 DbSession = Annotated[AsyncSession, Depends(get_db)]
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+#oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @auth_router.post("/register", response_model=UserResponse)
 async def register(user: UserCreation, db: DbSession):
@@ -40,22 +40,22 @@ async def login(user: UserCreation, db: DbSession):
         }
     raise HTTPException(status_code=401, detail="Invalid email or password")
 
-@auth_router.get("/me")
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db:AsyncSession= Depends(get_db)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, key, algorithms=[token_algorithm])
-        user_id = payload.get("sub")
-        if user_id is None:
-            raise credentials_exception
-        token_data = TokenData(user_id = user_id)
-    except InvalidTokenError:
-        raise credentials_exception
-    user = await get_user(user_id=int(token_data.user_id),db=db)
-    if user is None:
-        raise credentials_exception
-    return user
+#@auth_router.get("/me")
+# async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db:AsyncSession= Depends(get_db)):
+#     credentials_exception = HTTPException(
+#         status_code=status.HTTP_401_UNAUTHORIZED,
+#         detail="Could not validate credentials",
+#         headers={"WWW-Authenticate": "Bearer"},
+#     )
+#     try:
+#         payload = jwt.decode(token, key, algorithms=[token_algorithm])
+#         user_id = payload.get("sub")
+#         if user_id is None:
+#             raise credentials_exception
+#         token_data = TokenData(user_id = user_id)
+#     except InvalidTokenError:
+#         raise credentials_exception
+#     user = await get_user(user_id=int(token_data.user_id),db=db)
+#     if user is None:
+#         raise credentials_exception
+#     return user

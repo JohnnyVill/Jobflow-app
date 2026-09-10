@@ -1,13 +1,13 @@
-import pytest
+from datetime import UTC, datetime, timedelta
+
 import jwt
+import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import undefer
-from datetime import datetime, timedelta, timezone
 
-
+from app.core.security import key, token_algorithm
 from app.db.database import User
 from app.tests.conftest import async_test_session_local
-from app.core.security import key, token_algorithm
 
 
 #Data used to every application test
@@ -184,7 +184,7 @@ async def test_get_user(client, sample_users):
 async def test_expired_token(client):
     expired_payload = {
         "sub": "1",
-        "exp": datetime.now(timezone.utc) - timedelta(minutes=1)
+        "exp": datetime.now(UTC) - timedelta(minutes=1)
     }
 
     expired_token = jwt.encode(
@@ -206,7 +206,7 @@ async def test_expired_token(client):
 async def test_unknown_subject(client):
     payload = {
         "sub": "99999",
-        "exp": datetime.now(timezone.utc) + timedelta(minutes=30)
+        "exp": datetime.now(UTC) + timedelta(minutes=30)
     }
 
     token = jwt.encode(

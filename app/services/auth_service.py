@@ -1,16 +1,18 @@
-import jwt
-from jwt.exceptions import InvalidTokenError
-from fastapi.security import OAuth2PasswordBearer
-from fastapi import status, HTTPException, Depends
 from typing import Annotated
-from app.models.token_response import TokenData
+
+import jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jwt.exceptions import InvalidTokenError
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import undefer
+
 from app.core.security import key, token_algorithm
 from app.db.database import User, get_db
+from app.models.token_response import TokenData
 from app.models.users import UserCreation
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy import select
-from sqlalchemy.orm import undefer
 
 DbSession = Annotated[AsyncSession, Depends(get_db)]
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

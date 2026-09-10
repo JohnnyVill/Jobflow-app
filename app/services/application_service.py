@@ -1,11 +1,10 @@
 from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import undefer
 
-from app.db.database import Application, User
+from app.db.database import Application
 from app.models.application import JobApplication
-from app.models.users import UserCreation, UserResponse
+
 
 async def create_application(application: JobApplication, db: AsyncSession):
     #check if application already exist

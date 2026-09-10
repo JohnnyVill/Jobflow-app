@@ -5,13 +5,14 @@ from fastapi import status, HTTPException, Depends
 from typing import Annotated
 from app.models.token_response import TokenData
 from app.core.security import key, token_algorithm
-from app.db.database import User
+from app.db.database import User, get_db
 from app.models.users import UserCreation
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select
 from sqlalchemy.orm import undefer
 
+DbSession = Annotated[AsyncSession, Depends(get_db)]
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 async def register_user(user: UserCreation, db: AsyncSession):
@@ -49,7 +50,7 @@ async def authenticate_user(credentials: UserCreation,db:AsyncSession):
 
     return user
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db:AsyncSession):
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db:DbSession):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

@@ -140,13 +140,13 @@ async def test_nonuser_login(client, sample_users):
     }
 
 async def test_missing_token(client):
-    response = await client.get("/auth/me")
+    response = await client.get("/users/me")
 
     assert response.status_code == 401
 
 async def test_malformed_token(client):
     response = await client.get(
-        "/auth/me",
+        "/users/me",
         headers={
             "Authorization": "Bearer this-is-not-a-valid-token"
         }
@@ -172,7 +172,7 @@ async def test_get_user(client, sample_users):
     assert login.status_code == 200
     token = login.json()["access_token"]
     response = await client.get(
-        "/auth/me",
+        "/users/me",
         headers={
             "Authorization": f"Bearer {token}"
         }
@@ -194,7 +194,7 @@ async def test_expired_token(client):
     )
 
     response = await client.get(
-        "/auth/me",
+        "/users/me",
         headers={
             "Authorization": f"Bearer {expired_token}"
         }
@@ -216,7 +216,7 @@ async def test_unknown_subject(client):
     )
 
     response = await client.get(
-        "/auth/me",
+        "/users/me",
         headers={
             "Authorization": f"Bearer {token}"
         }

@@ -51,3 +51,36 @@ async def clean_tables():
         await db.commit()
 
     yield
+
+@pytest_asyncio.fixture
+async def registered_user(client):
+    user = {
+        "email": "joe@gmail.com",
+        "password": "softwareengineer",
+    }
+
+    response = await client.post(
+        "/auth/register",
+        json=user
+    )
+
+    assert response.status_code == 200
+
+    return user
+
+@pytest_asyncio.fixture
+async def auth_token(client, registered_user):
+    response = await client.post(
+        "/auth/login",
+        json=registered_user
+    )
+
+    assert response.status_code == 200
+
+    return response.json()["access_token"]
+
+@pytest_asyncio.fixture
+async def auth_headers(auth_token):
+    return {
+        "Authorization": f"Bearer {auth_token}"
+    }

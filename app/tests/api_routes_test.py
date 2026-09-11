@@ -248,9 +248,20 @@ async def test_duplicate_email(client, sample_users):
     )
     assert duplicate.status_code == 409
     
-async def test_post_applications(client, sample_applications):        
+async def test_post_applications(client, sample_applications): 
+    user_login = {
+            "email": "joe@gmail.com",
+            "password": "softwareengineer",
+        }
+    login = await client.post(
+        "/auth/login",
+        json=user_login
+    )
+    assert login.status_code == 200
+    token = login.json()["access_token"]       
     for application in sample_applications:
         response = await client.post(
+            token,
             "/applications",
             json=application
         )
@@ -258,9 +269,20 @@ async def test_post_applications(client, sample_applications):
 
 
 async def test_duplicate_application(client, sample_applications):
+    user_login = {
+            "email": "joe@gmail.com",
+            "password": "softwareengineer",
+        }
+    login = await client.post(
+        "/auth/login",
+        json=user_login
+    )
+    assert login.status_code == 200
+    token = login.json()["access_token"]      
     #populate table with data
     for application in sample_applications:
         response = await client.post(
+            token,
             "/applications",
             json=application
         )
@@ -280,9 +302,20 @@ async def test_duplicate_application(client, sample_applications):
     assert response.status_code == 409
 
 async def test_get_applications(client, sample_applications):
+    user_login = {
+            "email": "joe@gmail.com",
+            "password": "softwareengineer",
+        }
+    login = await client.post(
+        "/auth/login",
+        json=user_login
+    )
+    assert login.status_code == 200
+    token = login.json()["access_token"]  
     #populate table with data
     for application in sample_applications:
         response = await client.post(
+            token,
             "/applications",
             json=application
         )
@@ -296,9 +329,20 @@ async def test_get_applications(client, sample_applications):
     assert len(data) == len(sample_applications)
 
 async def test_get_application_id(client, sample_applications):
+    user_login = {
+            "email": "joe@gmail.com",
+            "password": "softwareengineer",
+        }
+    login = await client.post(
+        "/auth/login",
+        json=user_login
+    )
+    assert login.status_code == 200
+    token = login.json()["access_token"]  
     #populate table with data
     for application in sample_applications:
         response = await client.post(
+            token,
             "/applications",
             json=application
         )
@@ -317,9 +361,20 @@ async def test_get_application_id(client, sample_applications):
     assert data["status"] == data_id[0]["status"]
 
 async def test_delete_application(client, sample_applications):
+    user_login = {
+            "email": "joe@gmail.com",
+            "password": "softwareengineer",
+        }
+    login = await client.post(
+        "/auth/login",
+        json=user_login
+    )
+    assert login.status_code == 200
+    token = login.json()["access_token"]  
     #populate table with data
     for application in sample_applications:
         response = await client.post(
+            token,
             "/applications",
             json=application
         )
@@ -345,18 +400,50 @@ async def test_delete_application(client, sample_applications):
 
 
 async def test_get_missing_application(client):
-    response = await client.get("/applications/999")
+    user_login = {
+            "email": "joe@gmail.com",
+            "password": "softwareengineer",
+        }
+    login = await client.post(
+        "/auth/login",
+        json=user_login
+    )
+    assert login.status_code == 200
+    token = login.json()["access_token"]  
+    response = await client.get(token, "/applications/999")
 
     assert response.status_code == 404
 
 
 async def test_delete_nonexisting_application(client):
-    response = await client.delete("/applications/999")
+    user_login = {
+            "email": "joe@gmail.com",
+            "password": "softwareengineer",
+        }
+    login = await client.post(
+        "/auth/login",
+        json=user_login
+    )
+    assert login.status_code == 200
+    token = login.json()["access_token"]  
+
+    response = await client.delete(token, "/applications/999")
     assert response.status_code == 404
 
 
 async def test_invalid_application(client):
+    user_login = {
+            "email": "joe@gmail.com",
+            "password": "softwareengineer",
+        }
+    login = await client.post(
+        "/auth/login",
+        json=user_login
+    )
+    assert login.status_code == 200
+    token = login.json()["access_token"]  
     response = await client.post(
+        token,
         "/applications",
         json={
             "company":"good vibes",

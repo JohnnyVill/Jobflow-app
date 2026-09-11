@@ -29,3 +29,6 @@ def create_access_token(user: UserResponse):
 
     return token
 
+def decode_access_token(user_token):
+    payload = jwt.decode(user_token, key, algorithms=[token_algorithm])
+    return payload

@@ -374,3 +374,66 @@ async def test_invalid_application(client, auth_headers):
     )
 
     assert response.status_code ==  422
+
+@pytest.mark.parametrize(
+    "method,url",
+    [
+        ("post", "/applications"),
+        ("get", "/applications"),
+        ("get", "/applications/1"),
+        ("delete", "/applications/1"),
+    ]
+)
+async def test_application_routes_require_authentication(
+    client,
+    method,
+    url
+):
+    request = getattr(client, method)
+
+    kwargs = {}
+
+    if method == "post":
+        kwargs["json"] = {
+            "company": "google",
+            "position": "engineer",
+            "status": "applied",
+        }
+
+    response = await request(url, **kwargs)
+
+    assert response.status_code == 401
+
+
+@pytest.mark.parametrize(
+    "method,url",
+    [
+        ("post", "/applications"),
+        ("get", "/applications"),
+        ("get", "/applications/1"),
+        ("delete", "/applications/1"),
+    ]
+)
+async def test_application_routes_reject_invalid_token(
+    client,
+    method,
+    url
+):
+    request = getattr(client, method)
+
+    kwargs = {
+        "headers": {
+            "Authorization": "Bearer invalid-token"
+        }
+    }
+
+    if method == "post":
+        kwargs["json"] = {
+            "company": "google",
+            "position": "engineer",
+            "status": "applied",
+        }
+
+    response = await request(url, **kwargs)
+
+    assert response.status_code == 401

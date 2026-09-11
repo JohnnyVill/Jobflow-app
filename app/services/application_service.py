@@ -9,15 +9,18 @@ from app.models.application import JobApplication
 async def create_application(application: JobApplication, db: AsyncSession):
     #check if application already exist
     try:
-        async with db.begin():
-            new_application = Application(
-                company=application.company,
-                position=application.position,
-                status=application.status
-            )
-            db.add(new_application)
-            return new_application
+        
+        new_application = Application(
+            company=application.company,
+            position=application.position,
+            status=application.status
+        )
+        db.add(new_application)
+        await db.commit()
+        await db.refresh(new_application)
+        return new_application
     except IntegrityError:
+        await db.rollback()
         return None
 
 
